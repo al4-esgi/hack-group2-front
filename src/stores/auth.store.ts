@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 interface AuthState {
   isAuthenticated: boolean
@@ -18,8 +19,8 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => AsyncStorage),
       partialize: (s) => ({ isAuthenticated: s.isAuthenticated, token: s.token }),
-    }
+    },
   )
 )

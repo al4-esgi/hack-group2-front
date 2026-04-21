@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "hack-group2-front",
+    "slug": "guide-michelin",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./public/icons/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./public/icons/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.hackgroup2.front"
+    },
+    "android": {
+      "package": "com.hackgroup2.front",
+      "adaptiveIcon": {
+        "foregroundImage": "./public/icons/icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "8f376b54-caa7-490c-b902-243774d3b42e"
+      }
+    },
+    "owner": "cmbhugos-organization"
+  }
+}

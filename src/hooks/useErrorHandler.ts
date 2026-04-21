@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner'
+import { Alert } from 'react-native'
 
 interface AxiosErrorResponse {
   message?: string
@@ -12,7 +12,7 @@ export function useErrorHandler(namespace: 'auth' | 'home' | 'notFound' | 'commo
 
   const handleAxiosError = (error: unknown) => {
     if (!error || typeof error !== 'object' || !('response' in error)) {
-      toast.error(t('error', { ns: 'common' }))
+      Alert.alert(t('error', { ns: 'common' }))
       return
     }
 
@@ -24,7 +24,7 @@ export function useErrorHandler(namespace: 'auth' | 'home' | 'notFound' | 'commo
     }
 
     if (!axiosError.response?.data) {
-      toast.error(t('error', { ns: 'common' }))
+      Alert.alert(t('error', { ns: 'common' }))
       return
     }
 
@@ -50,7 +50,7 @@ export function useErrorHandler(namespace: 'auth' | 'home' | 'notFound' | 'commo
       }
     }
 
-    toast.error(errorMessage)
+    Alert.alert(errorMessage)
 
     return data
   }

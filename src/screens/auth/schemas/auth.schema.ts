@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import fieldErrors from '@/utils/field-errors'
+import fieldErrors from '../../../utils/field-errors'
 
 export const loginSchema = z.object({
   email: z.string().min(1, fieldErrors.email.required).email(fieldErrors.email.invalid),
