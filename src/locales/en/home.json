@@ -1,0 +1,17 @@
+{
+  "hero": {
+    "title": "Michelin Guide",
+    "subtitle": "Discover the finest tables and exceptional addresses",
+    "cta": "Explore"
+  },
+  "sections": {
+    "featured": "Our favourites",
+    "nearYou": "Near you",
+    "newlyStarred": "Newly starred"
+  },
+  "filters": {
+    "all": "All",
+    "restaurants": "Restaurants",
+    "hotels": "Hotels"
+  }
+}

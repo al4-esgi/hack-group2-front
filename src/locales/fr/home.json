@@ -1,0 +1,17 @@
+{
+  "hero": {
+    "title": "Guide Michelin",
+    "subtitle": "Découvrez les meilleures tables et adresses d'exception",
+    "cta": "Explorer"
+  },
+  "sections": {
+    "featured": "Nos coups de cœur",
+    "nearYou": "Près de chez vous",
+    "newlyStarred": "Nouvelles étoiles"
+  },
+  "filters": {
+    "all": "Tous",
+    "restaurants": "Restaurants",
+    "hotels": "Hôtels"
+  }
+}

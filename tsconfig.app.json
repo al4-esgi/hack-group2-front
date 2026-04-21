@@ -29,7 +29,9 @@
       "@screens/*": ["src/screens/*"],
       "@stores/*": ["./src/stores/*"],
       "@utils/*": ["./src/utils/*"],
-      "@api/*": ["./src/api/*"]
+      "@api/*": ["./src/api/*"],
+      "@i18n/*": ["./src/i18n/*"],
+      "@locales/*": ["./src/locales/*"]
     }
   },
   "include": ["src"]

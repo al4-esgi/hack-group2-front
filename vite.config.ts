@@ -53,6 +53,8 @@ export default defineConfig({
       "@stores": path.resolve(__dirname, "./src/stores"),
       "@utils": path.resolve(__dirname, "./src/utils"),
       "@api": path.resolve(__dirname, "./src/api"),
+      "@i18n": path.resolve(__dirname, "./src/i18n"),
+      "@locales": path.resolve(__dirname, "./src/locales"),
     },
   },
 });
