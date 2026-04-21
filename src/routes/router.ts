@@ -1,10 +1,10 @@
-import { createBrowserRouter } from "react-router";
-import RootLayout from "../layouts/RootLayout";
-import ProtectedLayout from "../layouts/ProtectedLayout";
-import NotFound from "../screens/NotFound.screen";
-import commonRoutes from "./common.routes";
-import authRoutes from "./auth.routes";
-import protectedRoutes from "./protected.routes";
+import { createBrowserRouter } from 'react-router'
+import RootLayout from '../layouts/RootLayout'
+import ProtectedLayout from '../layouts/ProtectedLayout'
+import NotFound from '../screens/NotFound.screen'
+import commonRoutes from './common.routes'
+import authRoutes from './auth.routes'
+import protectedRoutes from './protected.routes'
 
 const appRouter = createBrowserRouter([
   {
@@ -17,9 +17,9 @@ const appRouter = createBrowserRouter([
         Component: ProtectedLayout,
         children: protectedRoutes,
       },
-      { path: "*", Component: NotFound },
+      { path: '*', Component: NotFound },
     ],
   },
-]);
+])
 
-export default appRouter;
+export default appRouter

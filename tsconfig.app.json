@@ -26,12 +26,12 @@
       "@components/*": ["./src/components/*"],
       "@constants/*": ["./src/constants/*"],
       "@hooks/*": ["./src/hooks/*"],
-      "@screens/*": ["src/screens/*"],
+      "@screens/*": ["./src/screens/*"],
       "@stores/*": ["./src/stores/*"],
       "@utils/*": ["./src/utils/*"],
       "@api/*": ["./src/api/*"],
       "@i18n/*": ["./src/i18n/*"],
-      "@locales/*": ["./src/locales/*"]
+      "@locales/*": ["./src/locales/*"],
     }
   },
   "include": ["src"]

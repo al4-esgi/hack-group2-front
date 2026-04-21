@@ -1,5 +1,7 @@
+import { Button } from '@/components/ui/button'
+
 function Login() {
-  return <h1>Login</h1>;
+  return <Button>Login</Button>
 }
 
-export default Login;
+export default Login

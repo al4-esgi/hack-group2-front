@@ -1,5 +1,9 @@
 {
   "title": "Page not found",
   "description": "The page you are looking for does not exist or has been moved.",
-  "cta": "Back to home"
+  "cta": "Back to home",
+  "errors": {
+    "PAGE_NOT_FOUND": "The page you are looking for does not exist or has been moved.",
+    "REDIRECT_FAILED": "Failed to redirect to home page. Please try again."
+  }
 }

@@ -4,4 +4,4 @@ export const StaleTimes = {
   TEN_MINUTES: 600_000,
   THIRTY_MINUTES: 1_800_000,
   ONE_HOUR: 3_600_000,
-} as const;
+} as const

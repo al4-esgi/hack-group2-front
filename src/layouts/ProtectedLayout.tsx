@@ -9,5 +9,5 @@ export default function ProtectedLayout() {
     return <Navigate to={AppRoutes.LOGIN} replace />;
   }
 
-  return <Outlet />;
+  return <Outlet />
 }
