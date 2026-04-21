@@ -13,5 +13,11 @@
     "all": "All",
     "restaurants": "Restaurants",
     "hotels": "Hotels"
+  },
+  "errors": {
+    "FAILED_TO_LOAD_RESTAURANTS": "Failed to load restaurants. Please try again.",
+    "FAILED_TO_LOAD_FEATURED": "Failed to load featured restaurants. Please try again.",
+    "SEARCH_FAILED": "Search failed. Please try again.",
+    "GENERIC": "An error occurred while loading content. Please try again."
   }
 }

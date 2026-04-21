@@ -1,5 +1,9 @@
 {
   "title": "Page introuvable",
   "description": "La page que vous recherchez n'existe pas ou a été déplacée.",
-  "cta": "Retour à l'accueil"
+  "cta": "Retour à l'accueil",
+  "errors": {
+    "PAGE_NOT_FOUND": "La page que vous recherchez n'existe pas ou a été déplacée.",
+    "REDIRECT_FAILED": "Échec de la redirection vers la page d'accueil. Veuillez réessayer."
+  }
 }
