@@ -1,12 +1,11 @@
 import { Navigate, Outlet } from "react-router";
 import { AppRoutes } from "../constants/routes.constant";
-
-function isAuthenticated(): boolean {
-  return !!localStorage.getItem("token");
-}
+import { useAuthStore } from "../stores/auth.store";
 
 export default function ProtectedLayout() {
-  if (!isAuthenticated()) {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
+  if (!isAuthenticated) {
     return <Navigate to={AppRoutes.LOGIN} replace />;
   }
 
