@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useToast } from '../components/ui/toast'
+import { toast } from 'sonner'
 
 interface AxiosErrorResponse {
   message?: string
@@ -8,19 +8,11 @@ interface AxiosErrorResponse {
 }
 
 export function useErrorHandler(namespace: 'auth' | 'home' | 'notFound' | 'common' = 'common') {
-  const { toast } = useToast()
   const { t } = useTranslation()
 
   const handleAxiosError = (error: unknown) => {
-    console.error('Axios error:', error)
-
-    // Valida se é erro axios
     if (!error || typeof error !== 'object' || !('response' in error)) {
-      toast({
-        title: t('error', { ns: 'common' }),
-        description: t('error', { ns: 'common' }),
-        variant: 'destructive',
-      })
+      toast.error(t('error', { ns: 'common' }))
       return
     }
 
@@ -31,38 +23,26 @@ export function useErrorHandler(namespace: 'auth' | 'home' | 'notFound' | 'commo
       }
     }
 
-    // Valida se tem resposta com dados
     if (!axiosError.response?.data) {
-      toast({
-        title: t('error', { ns: 'common' }),
-        description: t('error', { ns: 'common' }),
-        variant: 'destructive',
-      })
+      toast.error(t('error', { ns: 'common' }))
       return
     }
 
     const data = axiosError.response.data
     const errorCode = data.code || 'GENERIC'
-    const status = axiosError.response.status
 
-    // Tenta traduzir pelo código de erro no namespace específico
-    // Fallback para common se não encontrar no namespace específico
-    let errorMessage = t(`errors.${errorCode}`, {
-      ns: namespace,
-      defaultValue: undefined,
-    })
+    const translationKey = `errors.${errorCode}` as const
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let errorMessage = t(translationKey as any, { ns: namespace })
 
-    // Se não encontrou no namespace específico, tenta no common
-    if (errorMessage === `errors.${errorCode}`) {
-      errorMessage = t(`error`, { ns: 'common' })
+    if (errorMessage === translationKey) {
+      errorMessage = t('error', { ns: 'common' })
     }
 
-    // Se tiver mensagem customizada do backend, usa ela
     if (data.message) {
       errorMessage = data.message
     }
 
-    // Erros de validação com múltiplos campos
     if (data.errors && Object.keys(data.errors).length > 0) {
       const firstError = Object.values(data.errors)[0]?.[0]
       if (firstError) {
@@ -70,12 +50,7 @@ export function useErrorHandler(namespace: 'auth' | 'home' | 'notFound' | 'commo
       }
     }
 
-    // Mostra toast baseado no status HTTP
-    toast({
-      title: t('error', { ns: 'common' }),
-      description: errorMessage,
-      variant: 'destructive',
-    })
+    toast.error(errorMessage)
 
     return data
   }
