@@ -1,4 +1,4 @@
-package com.hackgroup2.front
+package com.guidemichelin.front
 
 import android.app.Application
 import android.content.res.Configuration

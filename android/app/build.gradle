@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.hackgroup2.front'
+    namespace 'com.guidemichelin.front'
     defaultConfig {
-        applicationId 'com.hackgroup2.front'
+        applicationId 'com.guidemichelin.front'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

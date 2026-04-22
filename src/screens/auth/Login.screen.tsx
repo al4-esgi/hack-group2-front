@@ -1,12 +1,20 @@
 import { useState } from 'react'
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import * as WebBrowser from 'expo-web-browser'
 import { useTranslation } from 'react-i18next'
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { AppRoutes } from '../../constants/routes.constant'
 import { useAuthStore } from '../../stores/auth.store'
 import type { RootStackParamList } from '../../navigation/navigation.types'
+import {
+  buildWebAuthCallbackUrl,
+  buildGoogleSsoUrl,
+  extractJwtFromAuthCallbackUrl,
+} from '../../utils/google-sso'
 
 type Props = NativeStackScreenProps<RootStackParamList, typeof AppRoutes.LOGIN>
+
+WebBrowser.maybeCompleteAuthSession()
 
 export default function Login({ navigation }: Props) {
   const { t } = useTranslation(['auth'])
@@ -19,12 +27,29 @@ export default function Login({ navigation }: Props) {
       return
     }
 
-    setToken('demo-token-password')
-    navigation.replace(AppRoutes.ROOT)
+    Alert.alert('Connexion indisponible', 'La connexion email/password n’est pas encore branchée à l’API.')
   }
 
-  const handleGoogleLogin = () => {
-    setToken('demo-token-google')
+  const handleGoogleLogin = async () => {
+    const redirectUri = buildWebAuthCallbackUrl(process.env.EXPO_PUBLIC_API_HOST)
+    const googleSsoUrl = buildGoogleSsoUrl(process.env.EXPO_PUBLIC_API_HOST)
+    if (!googleSsoUrl || !redirectUri) {
+      Alert.alert('Configuration manquante', 'EXPO_PUBLIC_API_HOST est manquant.')
+      return
+    }
+
+    const result = await WebBrowser.openAuthSessionAsync(googleSsoUrl, redirectUri)
+    if (result.type !== 'success' || !result.url) {
+      return
+    }
+
+    const jwt = extractJwtFromAuthCallbackUrl(result.url)
+    if (!jwt) {
+      Alert.alert('Erreur', 'JWT introuvable dans la callback Google.')
+      return
+    }
+
+    setToken(jwt)
     navigation.replace(AppRoutes.ROOT)
   }
 
@@ -57,7 +82,12 @@ export default function Login({ navigation }: Props) {
         </Text>
       </Pressable>
 
-      <Pressable style={styles.secondaryButton} onPress={handleGoogleLogin}>
+      <Pressable
+        style={styles.secondaryButton}
+        onPress={() => {
+          void handleGoogleLogin()
+        }}
+      >
         <Text style={styles.secondaryButtonLabel}>Continuer avec Google</Text>
       </Pressable>
 

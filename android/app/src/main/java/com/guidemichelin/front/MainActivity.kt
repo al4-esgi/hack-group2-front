@@ -1,4 +1,4 @@
-package com.hackgroup2.front
+package com.guidemichelin.front
 
 import android.os.Build
 import android.os.Bundle

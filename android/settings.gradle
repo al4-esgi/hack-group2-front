@@ -31,7 +31,7 @@ extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
 }
 expoAutolinking.useExpoModules()
 
-rootProject.name = 'hack-group2-front'
+rootProject.name = 'guide-michelin'
 
 expoAutolinking.useExpoVersionCatalog()
 

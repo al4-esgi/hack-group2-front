@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "hack-group2-front",
+    "name": "Guide Michelin",
     "slug": "guide-michelin",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -16,10 +16,10 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.hackgroup2.front"
+      "bundleIdentifier": "com.guidemichelin.front"
     },
     "android": {
-      "package": "com.hackgroup2.front",
+      "package": "com.guidemichelin.front",
       "adaptiveIcon": {
         "foregroundImage": "./public/icons/icon.png",
         "backgroundColor": "#ffffff"
@@ -32,6 +32,7 @@
     },
     "owner": "cmbhugos-organization",
     "plugins": [
+      "expo-web-browser",
       "expo-font"
     ]
   }

@@ -16,3 +16,16 @@ export function resetToLogin() {
     }),
   )
 }
+
+export function resetToRoot() {
+  if (!navigationRef.isReady()) {
+    return
+  }
+
+  navigationRef.dispatch(
+    CommonActions.reset({
+      index: 0,
+      routes: [{ name: AppRoutes.ROOT }],
+    }),
+  )
+}
