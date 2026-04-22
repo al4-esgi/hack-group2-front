@@ -3,6 +3,8 @@ import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-nativ
 import * as WebBrowser from 'expo-web-browser'
 import { useTranslation } from 'react-i18next'
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
+import { AppActionButton } from '@/components/ui/app-action-button'
+import { colors, radius } from '../../app/theme/tokens'
 import { AppRoutes } from '../../constants/routes.constant'
 import { useAuthStore } from '../../stores/auth.store'
 import type { RootStackParamList } from '../../navigation/navigation.types'
@@ -76,20 +78,19 @@ export default function Login({ navigation }: Props) {
         style={styles.input}
       />
 
-      <Pressable style={styles.primaryButton} onPress={handlePasswordLogin}>
-        <Text style={styles.primaryButtonLabel}>
-          {t('login.submit', { ns: 'auth' })} (email/password)
-        </Text>
-      </Pressable>
+      <AppActionButton
+        label={`${t('login.submit', { ns: 'auth' })} (email/password)`}
+        onPress={handlePasswordLogin}
+        variant="primary"
+      />
 
-      <Pressable
-        style={styles.secondaryButton}
+      <AppActionButton
+        label="Continuer avec Google"
         onPress={() => {
           void handleGoogleLogin()
         }}
-      >
-        <Text style={styles.secondaryButtonLabel}>Continuer avec Google</Text>
-      </Pressable>
+        variant="secondary"
+      />
 
       <Pressable style={styles.registerButton} onPress={() => navigation.navigate(AppRoutes.REGISTER)}>
         <Text style={styles.registerLabel}>{t('login.register', { ns: 'auth' })}</Text>
@@ -104,58 +105,33 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 24,
     gap: 12,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.backgroundPrimary,
   },
   title: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#111111',
+    color: colors.textPrimary,
   },
   subtitle: {
     fontSize: 16,
-    color: '#555555',
+    color: colors.textSecondary,
     marginBottom: 14,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#dddddd',
-    borderRadius: 10,
+    borderColor: colors.borderSubtle,
+    borderRadius: radius.lg,
     paddingHorizontal: 12,
     paddingVertical: 11,
-    backgroundColor: '#ffffff',
-    color: '#111111',
-  },
-  primaryButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 10,
-    backgroundColor: '#111111',
-  },
-  primaryButtonLabel: {
-    textAlign: 'center',
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  secondaryButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#111111',
-    backgroundColor: '#ffffff',
-  },
-  secondaryButtonLabel: {
-    color: '#111111',
-    textAlign: 'center',
-    fontWeight: '600',
+    backgroundColor: colors.backgroundPrimary,
+    color: colors.textPrimary,
   },
   registerButton: {
     paddingVertical: 6,
   },
   registerLabel: {
     fontSize: 13,
-    color: '#333333',
+    color: colors.textSecondary,
     textAlign: 'center',
   },
 })
