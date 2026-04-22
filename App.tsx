@@ -10,6 +10,9 @@ import './src/i18n/config'
 import './src/i18n/types'
 import { useAuthStore } from './src/stores/auth.store'
 
+import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider'
+import '@/global.css'
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -45,14 +48,16 @@ export default function App() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <Suspense fallback={<Loader />}>
-        <NavigationContainer ref={navigationRef}>
-          <StatusBar style="auto" />
-          <AppNavigator />
-        </NavigationContainer>
-      </Suspense>
-    </QueryClientProvider>
+    <GluestackUIProvider mode="system">
+      <QueryClientProvider client={queryClient}>
+        <Suspense fallback={<Loader />}>
+          <NavigationContainer ref={navigationRef}>
+            <StatusBar style="auto" />
+            <AppNavigator />
+          </NavigationContainer>
+        </Suspense>
+      </QueryClientProvider>
+    </GluestackUIProvider>
   )
 }
 
