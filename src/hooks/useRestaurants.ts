@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { StaleTimes } from '../constants/query.constant'
 import { restaurantApi } from '../api/restaurants'
+import type { CuisineFilter, FacilityFilter, RestaurantDetail } from '../types/restaurant.type'
 
 export function useCuisines(q?: string, limit?: number, enabled = true) {
   return useQuery({

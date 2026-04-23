@@ -37,6 +37,8 @@
     "cuisines": "Cuisines",
     "cuisinesPlaceholder": "Search cuisines...",
     "facilities": "Facilities",
-    "facilitiesPlaceholder": "Search facilities..."
+    "facilitiesPlaceholder": "Search facilities...",
+    "amenities": "Amenities",
+    "amenitiesPlaceholder": "Search amenities..."
   }
 }

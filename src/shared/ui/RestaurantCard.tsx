@@ -1,18 +1,11 @@
 import { useState } from 'react'
-import { Pressable, StyleSheet, View } from 'react-native'
+import { Image, Pressable, StyleSheet, View } from 'react-native'
 import { Text } from '@/components/ui/text'
-import { colors, radius, spacing, typography } from '@/src/app/theme/tokens'
+import { colors, radius, shadow, spacing, typography } from '@/src/app/theme/tokens'
 import { DistinctionBadge } from './DistinctionBadge'
 import { FavoriteButton } from './FavoriteButton'
-import { LocationMeta } from './LocationMeta'
+import { PriceRange } from './PriceRange'
 import type { Restaurant } from '@/src/types/restaurant.type'
-
-type RestaurantCardProps = {
-  restaurant: Restaurant
-  isFavorite?: boolean
-  onToggleFavorite?: () => void
-  onPress?: () => void
-}
 
 export function RestaurantCard({
   restaurant,
@@ -30,88 +23,153 @@ export function RestaurantCard({
       accessibilityRole={onPress ? 'button' : undefined}
       accessibilityLabel={restaurant.name}
     >
-      <View style={styles.header}>
-        <Text style={styles.title}>{restaurant.name}</Text>
-        {onToggleFavorite ? (
-          <FavoriteButton active={isFavorite} onPress={onToggleFavorite} />
+      <View style={styles.content}>
+        {/* Header Row */}
+        <View style={styles.header}>
+          <View style={styles.titleContainer}>
+            <Text style={styles.name} numberOfLines={2}>
+              {restaurant.name}
+            </Text>
+            {(restaurant.city || restaurant.country) && (
+              <Text style={styles.location}>
+                {restaurant.city}{restaurant.city && restaurant.country ? ', ' : ''}{restaurant.country}
+              </Text>
+            )}
+          </View>
+          {onToggleFavorite && (
+            <FavoriteButton active={isFavorite} onPress={onToggleFavorite} />
+          )}
+        </View>
+
+        {/* Award & Price Row */}
+        <View style={styles.awardRow}>
+          {restaurant.awardCode && (
+            <DistinctionBadge 
+              type={restaurant.awardCode} 
+              stars={restaurant.stars} 
+            />
+          )}
+          {restaurant.hasGreenStar && (
+            <DistinctionBadge type="GREEN_STAR" />
+          )}
+          <PriceRange level={restaurant.priceLevel as 1|2|3|4} />
+        </View>
+
+        {/* Cuisines */}
+        {restaurant.cuisines.length > 0 && (
+          <Text style={styles.cuisines} numberOfLines={1}>
+            {restaurant.cuisines.join(' · ')}
+          </Text>
+        )}
+
+        {/* Meta info */}
+        <View style={styles.meta}>
+          {restaurant.distanceMeters !== null && restaurant.distanceMeters !== undefined && (
+            <Text style={styles.distance}>
+              {(restaurant.distanceMeters / 1000).toFixed(1)} km
+            </Text>
+          )}
+        </View>
+
+        {/* Description */}
+        {restaurant.description ? (
+          <View style={styles.descriptionContainer}>
+            <Text 
+              style={styles.description} 
+              numberOfLines={expanded ? undefined : 2}
+            >
+              {restaurant.description}
+            </Text>
+            {restaurant.description.length > 100 && (
+              <Pressable 
+                onPress={() => setExpanded(!expanded)}
+                hitSlop={8}
+              >
+                <Text style={styles.readMore}>
+                  {expanded ? 'Voir moins' : 'Lire la suite'}
+                </Text>
+              </Pressable>
+            )}
+          </View>
         ) : null}
       </View>
-      <View style={styles.badges}>
-        {restaurant.awardCode && (
-          <DistinctionBadge type={restaurant.awardCode} stars={restaurant.stars} />
-        )}
-        {restaurant.hasGreenStar && <DistinctionBadge type="GREEN_STAR" />}
-      </View>
-      {restaurant.cuisines.length > 0 && (
-        <Text style={styles.meta}>{restaurant.cuisines.join(', ')}</Text>
-      )}
-      <LocationMeta city={restaurant.city} area={restaurant.address} country={restaurant.country} />
-      {restaurant.description ? (
-        <Pressable onPress={() => setExpanded(!expanded)}>
-          <Text style={styles.description} numberOfLines={expanded ? undefined : 2}>
-            {restaurant.description}
-          </Text>
-          <Text style={styles.readMore}>{expanded ? 'Voir moins' : 'Lire la suite'}</Text>
-        </Pressable>
-      ) : null}
     </Pressable>
   )
 }
 
 const styles = StyleSheet.create({
-card: {
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    borderRadius: radius.lg,
+  card: {
     backgroundColor: colors.backgroundPrimary,
+    borderRadius: radius.lg,
+    overflow: 'hidden',
+    ...shadow.card,
+  },
+  imageContainer: {
+    width: '100%',
+    height: 160,
+    backgroundColor: colors.backgroundSubtle,
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+  content: {
     padding: spacing[3],
-    gap: spacing[1],
+    gap: spacing[2],
   },
   header: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'flex-start',
     gap: spacing[2],
   },
-  badges: {
-    flexDirection: 'row',
-    gap: spacing[1],
-    minHeight: 24,
-    alignItems: 'center',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 8,
-  },
-  title: {
+  titleContainer: {
     flex: 1,
+    gap: spacing[1],
+  },
+  name: {
     color: colors.textPrimary,
-    fontSize: typography.fontSize.title,
-    lineHeight: typography.lineHeight.title,
-    fontWeight: typography.fontWeight.bold,
+    fontSize: typography.fontSize.body,
+    lineHeight: typography.lineHeight.body,
+    fontWeight: typography.fontWeight.semibold,
   },
-  badges: {
-    flexDirection: 'row',
-    gap: 6,
-    minHeight: 24,
-    alignItems: 'center',
-  },
-  meta: {
+  location: {
     color: colors.textSecondary,
     fontSize: typography.fontSize.small,
     lineHeight: typography.lineHeight.small,
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
+  },
+  awardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
+  cuisines: {
+    color: colors.textSecondary,
+    fontSize: typography.fontSize.subText,
+    lineHeight: typography.lineHeight.subText,
+    fontStyle: 'italic',
+  },
+  meta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
+  distance: {
+    color: colors.accent,
+    fontSize: typography.fontSize.small,
+    fontWeight: typography.fontWeight.medium,
+  },
+  descriptionContainer: {
+    gap: spacing[1],
   },
   description: {
     color: colors.textSecondary,
-    fontSize: typography.fontSize.body,
-    lineHeight: typography.lineHeight.body,
+    fontSize: typography.fontSize.subText,
+    lineHeight: typography.lineHeight.subText,
   },
   readMore: {
-    color: colors.primary,
+    color: colors.accent,
     fontSize: typography.fontSize.subText,
-    fontWeight: typography.fontWeight.semibold,
-    marginTop: 4,
+    fontWeight: typography.fontWeight.medium,
   },
 })

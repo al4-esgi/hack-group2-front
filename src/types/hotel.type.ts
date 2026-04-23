@@ -20,3 +20,19 @@ export type Hotel = {
   amenities: string[]
   distanceMeters: number | null
 }
+
+export interface AmenityFilter {
+  id: number
+  name: string
+}
+
+export interface HotelDetail extends Hotel {
+  cityId: number
+  countryId: number
+  neighborhood: string
+  numRooms: number
+  checkInTime: number
+  checkOutTime: number
+  languages: string[]
+  amenities: string[]
+}
