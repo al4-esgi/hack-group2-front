@@ -80,6 +80,14 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
+  fullScreen: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1000,
+  },
   navbar: {
     justifyContent: 'space-around',
     alignItems: 'flex-end',

@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native'
 import { colors, radius } from '@/src/app/theme/tokens'
 
-type BadgeVariant = 'default' | 'success' | 'warning' | 'error'
+type BadgeVariant = 'default' | 'success' | 'warning' | 'error' | 'accent' | 'info'
 
 type BadgeProps = {
   label: string
@@ -28,6 +28,16 @@ const variantStyles: Record<BadgeVariant, { bg: string; text: string; border: st
     bg: 'rgba(189, 35, 51, 0.08)',
     text: colors.primary,
     border: colors.primary,
+  },
+  accent: {
+    bg: 'rgba(88, 44, 131, 0.08)',
+    text: colors.accent,
+    border: colors.accent,
+  },
+  info: {
+    bg: 'rgba(16, 149, 249, 0.08)',
+    text: colors.info,
+    border: colors.info,
   },
 }
 
