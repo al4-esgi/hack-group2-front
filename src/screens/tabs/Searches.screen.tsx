@@ -1,33 +1,21 @@
 import { useState } from 'react'
-import { FlatList, StyleSheet, Text, TextInput, View } from 'react-native'
+import { FlatList, StyleSheet, Text, View } from 'react-native'
+import { SearchBar } from '@/components/ui/search-bar'
 import { useRestaurants, useCuisines, useFacilities } from '../../hooks/useRestaurants'
 import { useRestaurantStore } from '../../stores/restaurant.store'
 import type { Restaurant } from '../../types/restaurant'
 
-const SUGGESTIONS = [
-  'Coffee spots',
-  'Brunch du week-end',
-  'Activités en groupe',
-  'Parcs et extérieur',
-  'Restaurants italiens',
-  'Musées',
-]
-
 export default function SearchesScreen() {
   const [query, setQuery] = useState('')
   const setSearch = useRestaurantStore((state) => state.setSearch)
-  const { data: restaurants, isLoading } = useRestaurants()
-  const { data: cuisines } = useCuisines(query || undefined, 5)
-  const { data: facilities } = useFacilities(query || undefined, 5)
+  const { data: restaurants, isLoading: isLoadingRestaurants } = useRestaurants()
+  const { data: cuisines, isLoading: isLoadingCuisines } = useCuisines(query || undefined, 5)
+  const { data: facilities, isLoading: isLoadingFacilities } = useFacilities(query || undefined, 5)
 
   const handleSearch = (text: string) => {
     setQuery(text)
     setSearch(text)
   }
-
-  const filteredSuggestions = SUGGESTIONS.filter((item) =>
-    item.toLowerCase().includes(query.trim().toLowerCase()),
-  ).slice(0, 5)
 
   const hasResults =
     (restaurants && restaurants.restaurants.length > 0) ||
@@ -50,19 +38,17 @@ export default function SearchesScreen() {
         Lance une recherche et retrouve des suggestions rapides.
       </Text>
 
-      <TextInput
+      <SearchBar
         value={query}
         onChangeText={handleSearch}
-        style={styles.input}
         placeholder="Rechercher un lieu, une catégorie..."
-        placeholderTextColor="#777777"
       />
 
-      {isLoading ? (
+      {isLoadingRestaurants || isLoadingCuisines || isLoadingFacilities ? (
         <Text style={styles.loadingText}>Chargement...</Text>
       ) : query.trim() === '' ? (
         <FlatList
-          data={filteredSuggestions}
+          data={[]}
           keyExtractor={(item) => item}
           renderItem={({ item }) => (
             <View style={styles.resultCard}>
@@ -70,9 +56,7 @@ export default function SearchesScreen() {
             </View>
           )}
           ListEmptyComponent={
-            <Text style={styles.emptyState}>
-              Aucun résultat pour cette recherche.
-            </Text>
+            <Text style={styles.emptyState}>Aucun résultat pour cette recherche.</Text>
           }
         />
       ) : hasResults ? (
@@ -93,9 +77,7 @@ export default function SearchesScreen() {
             ) : null
           }
           ListEmptyComponent={
-            <Text style={styles.emptyState}>
-              Aucun restaurant trouvé pour cette recherche.
-            </Text>
+            <Text style={styles.emptyState}>Aucun restaurant trouvé pour cette recherche.</Text>
           }
         />
       ) : (
@@ -121,16 +103,6 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     color: '#5a5a5a',
     fontSize: 15,
-  },
-  input: {
-    backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: '#dddddd',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 16,
-    color: '#111111',
   },
   loadingText: {
     marginTop: 14,
