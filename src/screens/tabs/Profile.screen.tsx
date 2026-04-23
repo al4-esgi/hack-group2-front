@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Image, StyleSheet, View } from 'react-native'
 import { useQuery } from '@tanstack/react-query'
 import { Text } from '@/components/ui/text'
-import { getCurrentUser } from '@/src/api/users.api'
+import { createUserList, getCurrentUser, getUserLists, type UserList } from '@/src/api/users.api'
 import { colors, radius } from '@/src/app/theme/tokens'
 import { StaleTimes } from '@/src/constants/query.constant'
 import { useAuthStore } from '@/src/stores/auth.store'
@@ -13,8 +13,10 @@ import {
   LoadingState,
   PageHeader,
   PrimaryButton,
+  SecondaryButton,
   Screen,
   Section,
+  TextField,
   TertiaryButton,
 } from '@/src/shared/ui'
 
@@ -26,42 +28,60 @@ type ProfileScreenProps = {
 const TASTE_CHIPS = ['Bistrot', 'Produits frais', 'Vin nature', '< 40€', 'Terrasse', 'Asiatique']
 
 type CollectionTabKey = 'visited' | 'lists' | 'favorites'
+type DisplayCollection = {
+  id: string
+  icon: string
+  title: string
+  count: number
+}
 
 const COLLECTION_TABS: { key: CollectionTabKey; label: string }[] = [
-  { key: 'visited', label: 'Visités' },
+  { key: 'visited', label: 'Visité' },
   { key: 'lists', label: 'Listes' },
   { key: 'favorites', label: 'Favoris' },
 ]
 
-const COLLECTIONS_BY_TAB: Record<CollectionTabKey, { icon: string; title: string; count: number }[]> = {
-  visited: [
-    { icon: '🍝', title: 'Mamma Roma', count: 1 },
-    { icon: '🍣', title: 'Sora Sushi', count: 2 },
-    { icon: '🥩', title: 'Grill 21', count: 1 },
-    { icon: '🥐', title: 'Maison Levain', count: 1 },
-  ],
-  lists: [
-    { icon: '🗺', title: 'Roadtrip Paris', count: 6 },
-    { icon: '⭐', title: 'Date night', count: 4 },
-    { icon: '☀️', title: 'Brunch du dimanche', count: 5 },
-  ],
-  favorites: [
-    { icon: '❤️', title: 'Le Petit Rivage', count: 1 },
-    { icon: '❤️', title: 'Bistro Luna', count: 1 },
-    { icon: '❤️', title: 'Parc des Arts', count: 1 },
-  ],
+const RESERVED_LIST_NAMES = new Set(['liked', 'visited'])
+
+function normalizeListName(name: string) {
+  return name.trim().toLowerCase()
+}
+
+function buildCollectionItem(list: UserList, icon: string, titleOverride?: string): DisplayCollection {
+  return {
+    id: list.id,
+    icon,
+    title: titleOverride ?? list.name,
+    count: list.itemsCount,
+  }
 }
 
 export default function ProfileScreen({ isAuthenticated, onRequestLogin }: ProfileScreenProps) {
   const clearToken = useAuthStore((state) => state.clearToken)
   const token = useAuthStore((state) => state.token)
   const [activeCollectionTab, setActiveCollectionTab] = useState<CollectionTabKey>('visited')
+  const [isCreateFormVisible, setIsCreateFormVisible] = useState(false)
+  const [newListName, setNewListName] = useState('')
+  const [createListError, setCreateListError] = useState<string | null>(null)
+  const [isCreatingList, setIsCreatingList] = useState(false)
 
   const { data: currentUser, isLoading, isError, refetch } = useQuery({
     queryKey: ['current-user', token],
     queryFn: getCurrentUser,
     enabled: isAuthenticated && Boolean(token),
     staleTime: StaleTimes.FIVE_MINUTES,
+  })
+
+  const {
+    data: userLists = [],
+    isLoading: isListsLoading,
+    isError: isListsError,
+    refetch: refetchLists,
+  } = useQuery({
+    queryKey: ['user-lists', currentUser?.id],
+    queryFn: () => getUserLists(currentUser!.id),
+    enabled: isAuthenticated && Boolean(token) && Boolean(currentUser?.id),
+    staleTime: StaleTimes.ONE_MINUTE,
   })
 
   if (!isAuthenticated) {
@@ -80,7 +100,65 @@ export default function ProfileScreen({ isAuthenticated, onRequestLogin }: Profi
 
   const firstLetter = (currentUser?.firstname?.[0] ?? 'A').toUpperCase()
   const displayName = currentUser ? `${currentUser.firstname} ${currentUser.lastname}`.trim() : 'Profil'
-  const displayedCollections = COLLECTIONS_BY_TAB[activeCollectionTab]
+  const visitedList = userLists.find((list) => normalizeListName(list.name) === 'visited')
+  const likedList = userLists.find((list) => normalizeListName(list.name) === 'liked')
+  const customLists = userLists.filter((list) => !RESERVED_LIST_NAMES.has(normalizeListName(list.name)))
+
+  const displayedCollections: DisplayCollection[] =
+    activeCollectionTab === 'visited'
+      ? visitedList
+        ? [buildCollectionItem(visitedList, '📍', 'Visité')]
+        : []
+      : activeCollectionTab === 'favorites'
+        ? likedList
+          ? [buildCollectionItem(likedList, '❤️', 'Favoris')]
+          : []
+        : customLists.map((list) => buildCollectionItem(list, '🗂'))
+
+  const handleCreateList = async () => {
+    if (!currentUser?.id || isCreatingList) {
+      return
+    }
+
+    const trimmedName = newListName.trim()
+
+    if (!trimmedName) {
+      setCreateListError('Le nom de la fiche est requis.')
+      return
+    }
+
+    if (RESERVED_LIST_NAMES.has(normalizeListName(trimmedName))) {
+      setCreateListError('Les noms "liked" et "visited" sont réservés.')
+      return
+    }
+
+    setCreateListError(null)
+    setIsCreatingList(true)
+
+    try {
+      await createUserList(currentUser.id, { name: trimmedName })
+      setNewListName('')
+      setIsCreateFormVisible(false)
+      await refetchLists()
+      setActiveCollectionTab('lists')
+    } catch {
+      setCreateListError('Impossible de créer la fiche pour le moment.')
+    } finally {
+      setIsCreatingList(false)
+    }
+  }
+
+  const collectionEmptyStateTitle =
+    activeCollectionTab === 'visited'
+      ? 'Aucune adresse visitée'
+      : activeCollectionTab === 'favorites'
+        ? 'Aucun favori'
+        : 'Aucune fiche personnalisée'
+
+  const collectionEmptyStateDescription =
+    activeCollectionTab === 'lists'
+      ? 'Crée ta première fiche pour organiser tes adresses.'
+      : 'Cette section sera alimentée dès que des restaurants y seront ajoutés.'
 
   return (
     <Screen scrollable>
@@ -121,27 +199,90 @@ export default function ProfileScreen({ isAuthenticated, onRequestLogin }: Profi
             <TertiaryButton
               key={tab.key}
               label={tab.label}
-              onPress={() => setActiveCollectionTab(tab.key)}
+              onPress={() => {
+                setActiveCollectionTab(tab.key)
+                setCreateListError(null)
+              }}
               active={activeCollectionTab === tab.key}
             />
           ))}
         </View>
 
+        {activeCollectionTab === 'lists' ? (
+          <View style={styles.listActions}>
+            {isCreateFormVisible ? (
+              <View style={styles.createListForm}>
+                <TextField
+                  label="Nom de la fiche"
+                  value={newListName}
+                  onChangeText={(value) => {
+                    setNewListName(value)
+                    if (createListError) {
+                      setCreateListError(null)
+                    }
+                  }}
+                  placeholder="Ex: Date nights"
+                  autoCapitalize="sentences"
+                  errorText={createListError}
+                />
+                <View style={styles.createListButtons}>
+                  <SecondaryButton
+                    label="Annuler"
+                    fullWidth={false}
+                    onPress={() => {
+                      setIsCreateFormVisible(false)
+                      setNewListName('')
+                      setCreateListError(null)
+                    }}
+                  />
+                  <PrimaryButton
+                    label={isCreatingList ? 'Création...' : 'Créer'}
+                    fullWidth={false}
+                    onPress={() => void handleCreateList()}
+                    disabled={isCreatingList}
+                  />
+                </View>
+              </View>
+            ) : (
+              <SecondaryButton
+                label="Créer une fiche"
+                fullWidth={false}
+                onPress={() => {
+                  setIsCreateFormVisible(true)
+                  setCreateListError(null)
+                }}
+              />
+            )}
+          </View>
+        ) : null}
+
         <View style={styles.listWrapper}>
-          {displayedCollections.map((collection) => (
-            <View key={`${activeCollectionTab}-${collection.title}`} style={styles.listRow}>
-              <View style={styles.listIconBox}>
-                <Text style={styles.listIcon}>{collection.icon}</Text>
+          {isLoading || isListsLoading ? <LoadingState label="Chargement des collections..." /> : null}
+          {isError ? (
+            <ErrorState message="Impossible de charger tes collections." onRetry={() => void refetch()} />
+          ) : null}
+          {isListsError ? (
+            <ErrorState message="Impossible de charger tes listes." onRetry={() => void refetchLists()} />
+          ) : null}
+          {!isLoading && !isListsLoading && !isError && !isListsError && displayedCollections.length === 0 ? (
+            <EmptyState title={collectionEmptyStateTitle} description={collectionEmptyStateDescription} />
+          ) : null}
+          {!isLoading && !isListsLoading && !isError && !isListsError
+            ? displayedCollections.map((collection) => (
+              <View key={`${activeCollectionTab}-${collection.id}`} style={styles.listRow}>
+                <View style={styles.listIconBox}>
+                  <Text style={styles.listIcon}>{collection.icon}</Text>
+                </View>
+                <View style={styles.listTexts}>
+                  <Text style={styles.listTitle}>{collection.title}</Text>
+                  <Text style={styles.listSub}>
+                    {collection.count} {collection.count > 1 ? 'lieux' : 'lieu'}
+                  </Text>
+                </View>
+                <Text style={styles.listChevron}>›</Text>
               </View>
-              <View style={styles.listTexts}>
-                <Text style={styles.listTitle}>{collection.title}</Text>
-                <Text style={styles.listSub}>
-                  {collection.count} {collection.count > 1 ? 'lieux' : 'lieu'}
-                </Text>
-              </View>
-              <Text style={styles.listChevron}>›</Text>
-            </View>
-          ))}
+            ))
+            : null}
         </View>
       </Section>
 
@@ -215,6 +356,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 4,
+  },
+  listActions: {
+    alignItems: 'flex-start',
+  },
+  createListForm: {
+    width: '100%',
+    gap: 8,
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+    borderRadius: radius.lg,
+    backgroundColor: colors.backgroundSubtle,
+    padding: 10,
+  },
+  createListButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 8,
   },
   listWrapper: {
     gap: 8,
