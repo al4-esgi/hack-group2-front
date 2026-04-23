@@ -1,29 +1,48 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { useState } from 'react'
+import { StyleSheet, View } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
-import { AppRoutes } from '../../constants/routes.constant'
-import type { RootStackParamList } from '../../navigation/navigation.types'
+import { colors } from '@/src/app/theme/tokens'
+import { AppRoutes } from '@/src/constants/routes.constant'
+import type { RootStackParamList } from '@/src/navigation/navigation.types'
+import { PageHeader, PrimaryButton, Screen, TertiaryButton, TextField } from '@/src/shared/ui'
 
 type Props = NativeStackScreenProps<RootStackParamList, typeof AppRoutes.REGISTER>
 
 export default function Register({ navigation }: Props) {
   const { t } = useTranslation('auth')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{t('register.title')}</Text>
-      <Text style={styles.subtitle}>{t('register.subtitle')}</Text>
+    <Screen scrollable edges={['top', 'left', 'right', 'bottom']}>
+      <View style={styles.container}>
+        <PageHeader title={t('register.title')} subtitle={t('register.subtitle')} />
 
-      <Pressable style={styles.primaryButton} onPress={() => navigation.navigate(AppRoutes.LOGIN)}>
-        <Text style={styles.primaryButtonLabel}>{t('register.submit')}</Text>
-      </Pressable>
+        <TextField
+          label="Email"
+          value={email}
+          onChangeText={setEmail}
+          helperText="La création de compte sera branchée à l'API backend."
+          keyboardType="email-address"
+        />
+        <TextField
+          label="Mot de passe"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
 
-      <Pressable style={styles.linkButton} onPress={() => navigation.navigate(AppRoutes.LOGIN)}>
-        <Text style={styles.linkLabel}>
-          {t('register.hasAccount')} {t('register.login')}
-        </Text>
-      </Pressable>
-    </View>
+        <PrimaryButton label={t('register.submit')} onPress={() => navigation.navigate(AppRoutes.LOGIN)} />
+
+        <TertiaryButton
+          label={`${t('register.hasAccount')} ${t('register.login')}`}
+          onPress={() => navigation.navigate(AppRoutes.LOGIN)}
+          style={styles.linkButton}
+          textStyle={styles.linkLabel}
+        />
+      </View>
+    </Screen>
   )
 }
 
@@ -31,37 +50,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 24,
     gap: 12,
-    backgroundColor: '#ffffff',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#111111',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#555555',
-    marginBottom: 24,
-  },
-  primaryButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 10,
-    backgroundColor: '#111111',
-  },
-  primaryButtonLabel: {
-    textAlign: 'center',
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
   },
   linkButton: {
     paddingVertical: 8,
+    alignSelf: 'center',
   },
   linkLabel: {
-    color: '#222222',
+    color: colors.textSecondary,
     textAlign: 'center',
+    fontSize: 14,
+    lineHeight: 20,
   },
 })

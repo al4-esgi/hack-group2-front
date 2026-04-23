@@ -1,7 +1,5 @@
 import type { StyleProp, TextStyle, ViewStyle } from 'react-native'
-import { StyleSheet } from 'react-native'
-import { colors, radius } from '@/src/app/theme/tokens'
-import { Button, ButtonText } from '@/components/ui/button'
+import { PrimaryButton, SecondaryButton, TertiaryButton } from '@/src/shared/ui'
 
 type AppActionButtonProps = {
   label: string
@@ -22,93 +20,38 @@ export function AppActionButton({
   style,
   textStyle,
 }: AppActionButtonProps) {
-  const isPrimary = variant === 'primary'
-  const isSecondary = variant === 'secondary'
-  const isTertiary = variant === 'tertiary'
+  if (variant === 'primary') {
+    return (
+      <PrimaryButton
+        label={label}
+        onPress={onPress}
+        disabled={disabled}
+        style={style}
+        textStyle={textStyle}
+      />
+    )
+  }
+
+  if (variant === 'secondary') {
+    return (
+      <SecondaryButton
+        label={label}
+        onPress={onPress}
+        disabled={disabled}
+        style={style}
+        textStyle={textStyle}
+      />
+    )
+  }
 
   return (
-    <Button
-      action="default"
-      variant="solid"
-      size="md"
-      disabled={disabled}
+    <TertiaryButton
+      label={label}
       onPress={onPress}
-      style={[
-        styles.baseButton,
-        isPrimary ? styles.primaryButton : undefined,
-        isSecondary ? styles.secondaryButton : undefined,
-        isTertiary ? (active ? styles.tertiaryButtonActive : styles.tertiaryButtonDefault) : undefined,
-        style,
-      ]}
-    >
-      <ButtonText
-        style={[
-          styles.baseLabel,
-          isPrimary ? styles.primaryLabel : undefined,
-          isSecondary ? styles.secondaryLabel : undefined,
-          isTertiary ? (active ? styles.tertiaryLabelActive : styles.tertiaryLabelDefault) : undefined,
-          textStyle,
-        ]}
-      >
-        {label}
-      </ButtonText>
-    </Button>
+      disabled={disabled}
+      active={active}
+      style={style}
+      textStyle={textStyle}
+    />
   )
 }
-
-const styles = StyleSheet.create({
-  baseButton: {
-    width: '100%',
-    minHeight: 44,
-    borderWidth: 1,
-    borderRadius: radius.lg,
-    paddingHorizontal: 16,
-  },
-  primaryButton: {
-    backgroundColor: colors.red,
-    borderColor: colors.red,
-  },
-  secondaryButton: {
-    backgroundColor: colors.backgroundPrimary,
-    borderColor: colors.borderSubtle,
-  },
-  tertiaryButtonDefault: {
-    backgroundColor: 'transparent',
-    borderColor: 'transparent',
-    borderWidth: 0,
-    minHeight: 34,
-    paddingHorizontal: 6,
-  },
-  tertiaryButtonActive: {
-    backgroundColor: 'transparent',
-    borderColor: 'transparent',
-    borderWidth: 0,
-    minHeight: 34,
-    paddingHorizontal: 6,
-  },
-  baseLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-  },
-  primaryLabel: {
-    color: colors.backgroundPrimary,
-  },
-  secondaryLabel: {
-    color: colors.textSecondary,
-  },
-  tertiaryLabelDefault: {
-    color: colors.textPrimary,
-    textTransform: 'none',
-    letterSpacing: 0,
-    fontSize: 14,
-  },
-  tertiaryLabelActive: {
-    color: colors.red,
-    textDecorationLine: 'underline',
-    textTransform: 'none',
-    letterSpacing: 0,
-    fontSize: 14,
-  },
-})

@@ -34,6 +34,18 @@
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="exp+guide-michelin"/>
       </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="com.guidemichelin.front"/>
+      </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="com.guidemichelin.front" android:host="auth" android:pathPrefix="/callback"/>
+      </intent-filter>
     </activity>
   </application>
 </manifest>

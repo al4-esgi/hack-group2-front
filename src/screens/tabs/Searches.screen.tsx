@@ -99,8 +99,6 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   resultCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
     borderWidth: 1,
     borderColor: '#e8e8e8',
     paddingHorizontal: 14,

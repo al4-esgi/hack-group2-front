@@ -2,6 +2,7 @@
   "expo": {
     "name": "Guide Michelin",
     "slug": "guide-michelin",
+    "scheme": "com.guidemichelin.front",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./public/icons/icon.png",
@@ -33,7 +34,8 @@
     "owner": "cmbhugos-organization",
     "plugins": [
       "expo-web-browser",
-      "expo-font"
+      "expo-font",
+      "@maplibre/maplibre-react-native"
     ]
   }
 }

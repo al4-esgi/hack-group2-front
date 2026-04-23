@@ -1,3 +1,5 @@
+export const APP_AUTH_SESSION_RETURN_URL = 'com.guidemichelin.front://'
+
 const TOKEN_QUERY_KEYS = ['jwt', 'token', 'access_token'] as const
 
 function readTokenFromParams(rawParams: string): string | null {
@@ -33,16 +35,6 @@ export function extractJwtFromAuthCallbackUrl(url: string): string | null {
   return null
 }
 
-export function buildWebAuthCallbackUrl(apiHost: string | undefined): string | null {
-  if (!apiHost) {
-    return null
-  }
-
-  const normalizedApiHost = apiHost.replace(/\/+$/, '')
-
-  return `${normalizedApiHost}/auth/callback`
-}
-
 export function buildGoogleSsoUrl(
   apiHost: string | undefined,
 ): string | null {
@@ -52,5 +44,5 @@ export function buildGoogleSsoUrl(
 
   const normalizedApiHost = apiHost.replace(/\/+$/, '')
 
-  return `${normalizedApiHost}/api/v1/auth/google`
+  return `${normalizedApiHost}/api/v1/auth/google?platform=MOBILE`
 }

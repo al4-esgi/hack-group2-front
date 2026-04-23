@@ -1,89 +1,104 @@
-import { ScrollView, StyleSheet, View } from 'react-native'
-import { Button, ButtonText } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Heading } from '@/components/ui/heading'
-import { Text } from '@/components/ui/text'
+import {
+  EditorialCard,
+  HotelCard,
+  ListHeader,
+  PageHeader,
+  RestaurantCard,
+  Screen,
+  Section,
+} from '@/src/shared/ui'
 
-const FEED_ITEMS = [
+const FEED_RESTAURANTS = [
   {
-    id: '1',
-    title: 'Nouveau spot à découvrir',
-    description: 'Un lieu populaire autour de toi avec de très bons avis cette semaine.',
+    name: 'Le Petit Rivage',
+    city: 'Paris',
+    area: '7e',
+    cuisine: 'Cuisine française',
+    description: 'Cuisine précise, produits de saison et salle intimiste.',
+    distinctions: ['star'] as const,
+    priceLevel: 3 as const,
   },
   {
-    id: '2',
-    title: 'Tendance locale',
-    description: 'Les utilisateurs enregistrent de plus en plus de lieux dans cette zone.',
+    name: 'Bistro Luna',
+    city: 'Lyon',
+    area: 'Presqu’île',
+    cuisine: 'Bistronomie',
+    description: 'Adresse vivante avec une carte courte et très régulière.',
+    distinctions: ['bib'] as const,
+    priceLevel: 2 as const,
+  },
+]
+
+const FEED_HOTELS = [
+  {
+    name: 'Maison Levain Hôtel',
+    city: 'Bordeaux',
+    area: 'Centre',
+    description: 'Maison calme avec design sobre et service attentif.',
+    priceLevel: 3 as const,
+  },
+]
+
+const FEED_EDITORIAL = [
+  {
+    title: 'Tendances de la semaine',
+    description: 'Les adresses qui progressent le plus dans les favoris.',
   },
   {
-    id: '3',
-    title: 'Recommandation du jour',
-    description: 'Un endroit à visiter maintenant selon ton historique récent.',
+    title: 'Escapade du week-end',
+    description: 'Un itinéraire court entre gastronomie, nature et hôtel de caractère.',
   },
 ]
 
 export default function FeedScreen() {
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Button>
-        <ButtonText>Click me</ButtonText>
-      </Button>
-      <Text style={styles.title}>Feed</Text>
-      <Text style={styles.subtitle}>Ta home principale avec les dernières recommandations.</Text>
+    <Screen scrollable>
+      <PageHeader
+        title="Feed"
+        subtitle="Sélection éditoriale et recommandations autour de toi."
+      />
 
-      <View style={styles.cards}>
-        {FEED_ITEMS.map((item) => (
-          <View key={item.id} style={styles.card}>
-            <Text style={styles.cardTitle}>{item.title}</Text>
-            <Text style={styles.cardDescription}>{item.description}</Text>
-          </View>
+      <Section>
+        <ListHeader title="Restaurants" subtitle="Sélection du moment" />
+        {FEED_RESTAURANTS.map((restaurant) => (
+          <RestaurantCard
+            key={restaurant.name}
+            name={restaurant.name}
+            city={restaurant.city}
+            area={restaurant.area}
+            cuisine={restaurant.cuisine}
+            description={restaurant.description}
+            distinctions={[...restaurant.distinctions]}
+            priceLevel={restaurant.priceLevel}
+          />
         ))}
-      </View>
-      <Card size="lg" variant="elevated" className="m-3">
-        <Heading size="md" className="mb-1">
-          Quick Start
-        </Heading>
-        <Text size="sm">Start building your next project in minutes</Text>
-      </Card>
-    </ScrollView>
+      </Section>
+
+      <Section>
+        <ListHeader title="Hôtels" subtitle="À proximité" />
+        {FEED_HOTELS.map((hotel) => (
+          <HotelCard
+            key={hotel.name}
+            name={hotel.name}
+            city={hotel.city}
+            area={hotel.area}
+            description={hotel.description}
+            priceLevel={hotel.priceLevel}
+          />
+        ))}
+      </Section>
+
+      <Section>
+        <ListHeader title="Éditorial" subtitle="À lire" />
+        {FEED_EDITORIAL.map((item) => (
+          <EditorialCard
+            key={item.title}
+            title={item.title}
+            description={item.description}
+            eyebrow="Guide"
+          />
+        ))}
+      </Section>
+    </Screen>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    padding: 20,
-    backgroundColor: '#f7f7f7',
-  },
-  title: {
-    fontSize: 30,
-    fontWeight: '700',
-    color: '#101010',
-  },
-  subtitle: {
-    marginTop: 6,
-    fontSize: 15,
-    color: '#5a5a5a',
-    marginBottom: 18,
-  },
-  cards: {
-    gap: 12,
-  },
-  card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 14,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: '#ececec',
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111111',
-    marginBottom: 6,
-  },
-  cardDescription: {
-    color: '#444444',
-    lineHeight: 20,
-  },
-})

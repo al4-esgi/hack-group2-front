@@ -2,6 +2,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { AppRoutes } from '../constants/routes.constant'
 import MainTabsScreen from '../screens/MainTabs.screen'
 import NotFoundScreen from '../screens/NotFound.screen'
+import AuthCallbackScreen from '../screens/auth/AuthCallback.screen'
 import LoginScreen from '../screens/auth/Login.screen'
 import RegisterScreen from '../screens/auth/Register.screen'
 import type { RootStackParamList } from './navigation.types'
@@ -30,6 +31,13 @@ export default function AppNavigator() {
         component={RegisterScreen}
         options={{
           headerTitle: 'Inscription',
+        }}
+      />
+      <Stack.Screen
+        name={AppRoutes.AUTH_CALLBACK}
+        component={AuthCallbackScreen}
+        options={{
+          headerShown: false,
         }}
       />
       <Stack.Screen

@@ -1,30 +1,49 @@
 export const colors = {
-  // Brand
-  red: 'rgb(186, 11, 47)',
+  // Michelin Design System - By Universe palette
+  byUniverse: {
+    purpleEngaged: 'rgb(88, 44, 131)', // #582C83
+    generousGreen: 'rgb(132, 189, 0)', // #84BD00
+    sustainableGrey: 'rgb(83, 86, 90)', // #53565A
+    redGastronomy: 'rgb(189, 35, 51)', // #BD2333
+    skyBlue: 'rgb(16, 149, 249)', // #1095F9
+    greenTravel: 'rgb(23, 167, 143)', // #17A78F
+  },
 
-  // Text
-  textPrimary: 'rgb(25, 25, 25)',
-  textSecondary: 'rgb(117, 117, 117)',
-  textTertiary: 'rgb(72, 72, 74)',
+  // Brand semantic colors
+  primary: 'rgb(189, 35, 51)',
+  accent: 'rgb(88, 44, 131)',
+  success: 'rgb(132, 189, 0)',
+  info: 'rgb(16, 149, 249)',
+  travel: 'rgb(23, 167, 143)',
+
+  // Backward-compatible alias
+  red: 'rgb(189, 35, 51)',
+
+  // Text (Michelin DS gray guidance)
+  textPrimary: 'rgb(26, 26, 26)',
+  textSecondary: 'rgb(83, 86, 90)',
+  textTertiary: 'rgb(102, 102, 102)',
 
   // Backgrounds
-  backgroundPrimary: 'rgb(255, 255, 255)',
-  backgroundSubtle: 'rgb(248, 248, 248)',
+  backgroundPrimary: 'rgb(255, 255, 255)', // #FFFFFF
+  backgroundSubtle: 'rgb(242, 242, 242)', // #F2F2F2
 
   // Borders
-  borderSubtle: 'rgb(230, 230, 230)',
-  divider: 'rgb(238, 238, 238)',
+  borderSubtle: 'rgb(229, 229, 229)', // #E5E5E5
+  divider: 'rgb(229, 229, 229)',
 } as const
 
 export const typography = {
   fontSize: {
-    title: 20,
+    display: 32,
+    title: 24,
     body: 16,
     subText: 14,
     small: 12,
   },
   lineHeight: {
-    title: 28,
+    display: 48,
+    title: 36,
     body: 24,
     subText: 20,
     small: 16,
@@ -46,14 +65,14 @@ export const typography = {
 export const spacing = {
   1: 4,
   2: 8,
-  3: 12,
-  4: 16,
-  5: 20,
-  6: 24,
-  7: 28,
-  8: 32,
-  10: 40,
-  12: 48,
+  3: 16,
+  4: 24,
+  5: 32,
+  6: 40,
+  7: 48,
+  8: 56,
+  10: 64,
+  12: 72,
 } as const
 
 export const radius = {

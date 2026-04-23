@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
-import { colors, radius } from '../app/theme/tokens'
-import { AppRoutes } from '../constants/routes.constant'
-import type { RootStackParamList } from '../navigation/navigation.types'
-import { useAuthStore } from '../stores/auth.store'
+import { colors, radius } from '@/src/app/theme/tokens'
+import { AppRoutes } from '@/src/constants/routes.constant'
+import type { RootStackParamList } from '@/src/navigation/navigation.types'
+import { useAuthStore } from '@/src/stores/auth.store'
+import { BottomActionBar } from '@/src/shared/ui'
 import FeedScreen from './tabs/Feed.screen'
-import MapScreen from './tabs/Map.screen'
+import MapScreen from './tabs/MapScreen'
 import ProfileScreen from './tabs/Profile.screen'
 import SavedScreen from './tabs/Saved.screen'
 import SearchesScreen from './tabs/Searches.screen'
@@ -47,31 +47,17 @@ export default function MainTabsScreen({ navigation }: Props) {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right', 'bottom']}>
+    <View style={styles.container}>
       <View style={styles.content}>{renderTabContent()}</View>
 
-      <View style={styles.navbar}>
+      <BottomActionBar style={styles.navbar}>
         {TAB_ITEMS.map((tab) => {
           const isActive = tab.key === activeTab
 
           return (
-            <Pressable
-              key={tab.key}
-              style={styles.navButton}
-              onPress={() => setActiveTab(tab.key)}
-            >
-              <View
-                style={[
-                  styles.navIcon,
-                  isActive ? styles.navIconActive : undefined,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.navIconLabel,
-                    isActive ? styles.navIconLabelActive : undefined,
-                  ]}
-                >
+            <Pressable key={tab.key} style={styles.navButton} onPress={() => setActiveTab(tab.key)}>
+              <View style={[styles.navIcon, isActive ? styles.navIconActive : undefined]}>
+                <Text style={[styles.navIconLabel, isActive ? styles.navIconLabelActive : undefined]}>
                   {tab.icon}
                 </Text>
               </View>
@@ -81,13 +67,13 @@ export default function MainTabsScreen({ navigation }: Props) {
             </Pressable>
           )
         })}
-      </View>
-    </SafeAreaView>
+      </BottomActionBar>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  container: {
     flex: 1,
     backgroundColor: colors.backgroundPrimary,
   },
@@ -95,15 +81,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   navbar: {
-    flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'flex-end',
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 12,
-    borderTopWidth: 1,
-    borderTopColor: colors.divider,
-    backgroundColor: colors.backgroundPrimary,
   },
   navButton: {
     flex: 1,
@@ -122,7 +101,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.backgroundPrimary,
   },
   navIconActive: {
-    borderColor: colors.red,
+    borderColor: colors.primary,
   },
   navIconLabel: {
     fontSize: 11,
@@ -130,7 +109,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   navIconLabelActive: {
-    color: colors.red,
+    color: colors.primary,
   },
   navLabel: {
     fontSize: 9,
@@ -140,6 +119,6 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   navLabelActive: {
-    color: colors.red,
+    color: colors.primary,
   },
 })

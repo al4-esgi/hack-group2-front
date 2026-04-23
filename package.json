@@ -16,6 +16,7 @@
     "@gluestack-ui/core": "^3.0.17",
     "@gluestack-ui/utils": "^3.0.21",
     "@legendapp/motion": "^2.3.0",
+    "@maplibre/maplibre-react-native": "^11.0.1",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-masked-view/masked-view": "0.3.2",
     "@react-navigation/native": "^7.2.2",

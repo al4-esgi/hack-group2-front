@@ -1,18 +1,25 @@
 import { useState } from 'react'
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Alert, StyleSheet, View } from 'react-native'
 import * as WebBrowser from 'expo-web-browser'
 import { useTranslation } from 'react-i18next'
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
-import { AppActionButton } from '@/components/ui/app-action-button'
-import { colors, radius } from '../../app/theme/tokens'
-import { AppRoutes } from '../../constants/routes.constant'
-import { useAuthStore } from '../../stores/auth.store'
-import type { RootStackParamList } from '../../navigation/navigation.types'
+import { colors } from '@/src/app/theme/tokens'
+import { AppRoutes } from '@/src/constants/routes.constant'
+import type { RootStackParamList } from '@/src/navigation/navigation.types'
+import { useAuthStore } from '@/src/stores/auth.store'
 import {
-  buildWebAuthCallbackUrl,
+  APP_AUTH_SESSION_RETURN_URL,
   buildGoogleSsoUrl,
   extractJwtFromAuthCallbackUrl,
-} from '../../utils/google-sso'
+} from '@/src/utils/google-sso'
+import {
+  PageHeader,
+  PrimaryButton,
+  Screen,
+  SecondaryButton,
+  TertiaryButton,
+  TextField,
+} from '@/src/shared/ui'
 
 type Props = NativeStackScreenProps<RootStackParamList, typeof AppRoutes.LOGIN>
 
@@ -33,14 +40,13 @@ export default function Login({ navigation }: Props) {
   }
 
   const handleGoogleLogin = async () => {
-    const redirectUri = buildWebAuthCallbackUrl(process.env.EXPO_PUBLIC_API_HOST)
     const googleSsoUrl = buildGoogleSsoUrl(process.env.EXPO_PUBLIC_API_HOST)
-    if (!googleSsoUrl || !redirectUri) {
+    if (!googleSsoUrl) {
       Alert.alert('Configuration manquante', 'EXPO_PUBLIC_API_HOST est manquant.')
       return
     }
 
-    const result = await WebBrowser.openAuthSessionAsync(googleSsoUrl, redirectUri)
+    const result = await WebBrowser.openAuthSessionAsync(googleSsoUrl, APP_AUTH_SESSION_RETURN_URL)
     if (result.type !== 'success' || !result.url) {
       return
     }
@@ -56,46 +62,50 @@ export default function Login({ navigation }: Props) {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{t('login.title', { ns: 'auth' })}</Text>
-      <Text style={styles.subtitle}>{t('login.subtitle', { ns: 'auth' })}</Text>
+    <Screen scrollable edges={['top', 'left', 'right', 'bottom']}>
+      <View style={styles.container}>
+        <PageHeader
+          title={t('login.title', { ns: 'auth' })}
+          subtitle={t('login.subtitle', { ns: 'auth' })}
+        />
 
-      <TextInput
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        placeholder={t('login.email', { ns: 'auth' })}
-        placeholderTextColor="#888888"
-        style={styles.input}
-      />
-      <TextInput
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        placeholder={t('login.password', { ns: 'auth' })}
-        placeholderTextColor="#888888"
-        style={styles.input}
-      />
+        <TextField
+          label={t('login.email', { ns: 'auth' })}
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          textContentType="emailAddress"
+        />
 
-      <AppActionButton
-        label={`${t('login.submit', { ns: 'auth' })} (email/password)`}
-        onPress={handlePasswordLogin}
-        variant="primary"
-      />
+        <TextField
+          label={t('login.password', { ns: 'auth' })}
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          textContentType="password"
+        />
 
-      <AppActionButton
-        label="Continuer avec Google"
-        onPress={() => {
-          void handleGoogleLogin()
-        }}
-        variant="secondary"
-      />
+        <PrimaryButton
+          label={`${t('login.submit', { ns: 'auth' })} (email/password)`}
+          onPress={handlePasswordLogin}
+        />
 
-      <Pressable style={styles.registerButton} onPress={() => navigation.navigate(AppRoutes.REGISTER)}>
-        <Text style={styles.registerLabel}>{t('login.register', { ns: 'auth' })}</Text>
-      </Pressable>
-    </View>
+        <SecondaryButton
+          label="Continuer avec Google"
+          onPress={() => {
+            void handleGoogleLogin()
+          }}
+        />
+
+        <TertiaryButton
+          label={t('login.register', { ns: 'auth' })}
+          onPress={() => navigation.navigate(AppRoutes.REGISTER)}
+          style={styles.registerButton}
+          textStyle={styles.registerLabel}
+        />
+      </View>
+    </Screen>
   )
 }
 
@@ -103,35 +113,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 24,
     gap: 12,
-    backgroundColor: colors.backgroundPrimary,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: colors.textPrimary,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: colors.textSecondary,
-    marginBottom: 14,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    borderRadius: radius.lg,
-    paddingHorizontal: 12,
-    paddingVertical: 11,
-    backgroundColor: colors.backgroundPrimary,
-    color: colors.textPrimary,
   },
   registerButton: {
     paddingVertical: 6,
+    alignSelf: 'center',
   },
   registerLabel: {
     fontSize: 13,
+    lineHeight: 18,
     color: colors.textSecondary,
-    textAlign: 'center',
   },
 })
