@@ -8,13 +8,36 @@ import type {
 
 export class SearchApi {
   async getSearch(params: GetSearchParams): Promise<SearchResponse> {
-    // Remove undefined values to avoid sending empty params
-    const cleanParams = Object.fromEntries(
-      Object.entries(params).filter(([_, v]) => v !== undefined && v !== null)
-    )
+    const queryParams: Record<string, string | number | boolean> = {}
+
+    queryParams.page = params.page || 1
+    queryParams.pageSize = params.pageSize || 20
+
+    if (params.sortBy) queryParams.sortBy = params.sortBy
+    if (params.sortDirection) queryParams.sortDirection = params.sortDirection
+    if (params.types?.length) queryParams.types = params.types.join(',')
+    if (params.search) queryParams.search = params.search
+    if (params.countryId) queryParams.countryId = params.countryId
+    if (params.cityId) queryParams.cityId = params.cityId
+    if (params.lat) queryParams.lat = params.lat
+    if (params.lng) queryParams.lng = params.lng
+    if (params.radiusKm) queryParams.radiusKm = params.radiusKm
+    if (params.amenityIds?.length) queryParams.amenityIds = params.amenityIds.join(',')
+    if (params.sustainableHotel != null) queryParams.sustainableHotel = params.sustainableHotel
+    if (params.bookable != null) queryParams.bookable = params.bookable
+    if (params.isPlus != null) queryParams.isPlus = params.isPlus
+    if (params.distinction) queryParams.distinction = params.distinction
+    if (params.cuisineIds?.length) queryParams.cuisineIds = params.cuisineIds.join(',')
+    if (params.facilityIds?.length) queryParams.facilityIds = params.facilityIds.join(',')
+    if (params.awardCode) queryParams.awardCode = params.awardCode
+    if (params.minStars) queryParams.minStars = params.minStars
+    if (params.maxStars) queryParams.maxStars = params.maxStars
+    if (params.greenStar != null) queryParams.greenStar = params.greenStar
+    if (params.minPriceLevel) queryParams.minPriceLevel = params.minPriceLevel
+    if (params.maxPriceLevel) queryParams.maxPriceLevel = params.maxPriceLevel
     
     const response = await apiClient.get<SearchResponse>('/api/v1/search', {
-      params: cleanParams,
+      params: queryParams,
     })
     return response.data
   }
