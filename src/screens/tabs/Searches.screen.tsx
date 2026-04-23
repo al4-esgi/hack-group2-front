@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { StyleSheet, View } from 'react-native'
-import { PageHeader, Screen, SearchFilters, SearchResultList } from '@/src/shared/ui'
+import { PageHeader, Screen, SearchResultList, SearchFilters } from '@/src/shared/ui'
 import { spacing } from '@/src/app/theme/tokens'
 
 export default function SearchesScreen() {

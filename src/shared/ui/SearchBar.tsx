@@ -6,10 +6,11 @@ type SearchBarProps = {
   value: string
   onChangeText: (text: string) => void
   onFocus?: () => void
+  onBlur?: () => void
   placeholder?: string
 }
 
-export function SearchBar({ value, onChangeText, onFocus, placeholder }: SearchBarProps) {
+export function SearchBar({ value, onChangeText, onFocus, onBlur, placeholder }: SearchBarProps) {
   return (
     <View style={styles.container}>
       <Ionicons name="search" size={18} color={colors.textSecondary} style={styles.icon} />
@@ -17,6 +18,7 @@ export function SearchBar({ value, onChangeText, onFocus, placeholder }: SearchB
         value={value}
         onChangeText={onChangeText}
         onFocus={onFocus}
+        onBlur={onBlur}
         placeholder={placeholder}
         placeholderTextColor={colors.textSecondary}
         style={styles.input}

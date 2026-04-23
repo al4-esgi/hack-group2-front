@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
     gap: spacing[2],
   },
   distance: {
-    color: colors.accent,
+    color: colors.primary,
     fontSize: typography.fontSize.small,
     fontWeight: typography.fontWeight.medium,
   },
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     lineHeight: typography.lineHeight.subText,
   },
   readMore: {
-    color: colors.accent,
+    color: colors.primary,
     fontSize: typography.fontSize.subText,
     fontWeight: typography.fontWeight.medium,
   },

@@ -4,81 +4,54 @@ import { useTranslation } from 'react-i18next'
 import * as Location from 'expo-location'
 import { FilterChip } from './FilterChip'
 import { SearchBar } from './SearchBar'
+import { AutocompleteFilter } from './AutocompleteFilter'
 import { useSearchStore } from '@/src/stores/search.store'
 import { useCountries, useCities } from '@/src/hooks/useSearch'
 import { useAmenities } from '@/src/hooks/useHotels'
 import { useCuisines, useFacilities } from '@/src/hooks/useRestaurants'
 import { SearchType } from '@/src/types/search.type'
 import { AwardCode } from '@/src/types/restaurant.type'
-import { colors, radius, shadow, spacing, typography } from '@/src/app/theme/tokens'
+import { colors, radius, spacing, typography } from '@/src/app/theme/tokens'
+import { X } from 'lucide-react-native'
 
 interface SearchFiltersProps {
   query: string
   onSearchChange: (text: string) => void
-  onSearchFocus?: () => void
   isLoading?: boolean
 }
 
 export function SearchFilters({
   query,
   onSearchChange,
-  onSearchFocus,
   isLoading,
 }: SearchFiltersProps) {
   const { t } = useTranslation('search')
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [countrySearch, setCountrySearch] = useState('')
   const [citySearch, setCitySearch] = useState('')
-  const [showCountryList, setShowCountryList] = useState(false)
-  const [showCityList, setShowCityList] = useState(false)
+  const [selectedCountryName, setSelectedCountryName] = useState('')
+  const [selectedCityName, setSelectedCityName] = useState('')
   const [amenitySearch, setAmenitySearch] = useState('')
-  const [showAmenityList, setShowAmenityList] = useState(false)
   const [cuisineSearch, setCuisineSearch] = useState('')
-  const [showCuisineList, setShowCuisineList] = useState(false)
   const [facilitySearch, setFacilitySearch] = useState('')
-  const [showFacilityList, setShowFacilityList] = useState(false)
+  
+  // Cache selected items for chips
+  const [selectedCuisines, setSelectedCuisines] = useState<FilterItem[]>([])
+  const [selectedFacilities, setSelectedFacilities] = useState<FilterItem[]>([])
+  const [selectedAmenities, setSelectedAmenities] = useState<FilterItem[]>([])
+  
+  type FilterItem = { id: number; name: string }
 
   const params = useSearchStore((state) => state.params)
   const setParams = useSearchStore((state) => state.setParams)
   const setSearch = useSearchStore((state) => state.setSearch)
 
-  // Autocomplete hooks - enabled when showing list
-  const { data: countries } = useCountries(
-    countrySearch,
-    10,
-    showCountryList || countrySearch.length > 0,
-  )
-  const { data: cities } = useCities(
-    citySearch,
-    10,
-    params.countryId,
-    showCityList || citySearch.length > 0,
-  )
-  const { data: amenities } = useAmenities(
-    amenitySearch,
-    10,
-    showAmenityList || amenitySearch.length > 0,
-  )
-  const { data: cuisines } = useCuisines(
-    cuisineSearch,
-    10,
-    showCuisineList || cuisineSearch.length > 0,
-  )
-  const { data: facilities } = useFacilities(
-    facilitySearch,
-    10,
-    showFacilityList || facilitySearch.length > 0,
-  )
-
-  const handleCountryFocus = useCallback(() => {
-    setCountrySearch('')
-    setShowCountryList(true)
-  }, [])
-
-  const handleCityFocus = useCallback(() => {
-    setCitySearch('')
-    setShowCityList(true)
-  }, [])
+  // Autocomplete hooks - enabled by default for dropdown
+  const { data: countries } = useCountries(countrySearch, 10, true)
+  const { data: cities } = useCities(citySearch, 10, params.countryId, true)
+  const { data: amenities } = useAmenities(amenitySearch, 10, true)
+  const { data: cuisines } = useCuisines(cuisineSearch, 10, true)
+  const { data: facilities } = useFacilities(facilitySearch, 10, true)
 
   const handleSearch = useCallback(
     (text: string) => {
@@ -241,62 +214,57 @@ export function SearchFilters({
       </View>
 
       {showAdvanced === true && (
-        <View style={styles.advancedPanel}>
-          <ScrollView
-            style={styles.advancedScroll}
-            showsVerticalScrollIndicator
-            contentContainerStyle={styles.advancedContent}
-          >
+        <ScrollView
+          style={styles.advancedPanel}
+          showsVerticalScrollIndicator
+          contentContainerStyle={styles.advancedContent}
+        >
             {/* COUNTRY */}
             <View style={styles.filterSection}>
               <Text style={styles.sectionTitle}>{t('filters.country')}</Text>
-
               {params.countryId ? (
-                <Pressable
-                  style={styles.selectedChip}
-                  onPress={() => {
+                <View style={styles.selectedContainer}>
+                  <FilterChip
+                    label={selectedCountryName}
+                    active={true}
+                    onPress={() => {
+                      setParams({ countryId: undefined, cityId: undefined })
+                      setCountrySearch('')
+                      setSelectedCountryName('')
+                      setCitySearch('')
+                      setSelectedCityName('')
+                    }}
+                  />
+                </View>
+              ) : (
+                <AutocompleteFilter
+                  data={countries}
+                  value={countrySearch}
+                  onChangeText={setCountrySearch}
+                  selectedIds={params.countryId ? [params.countryId] : undefined}
+                  onSelect={(item) => {
+                    setParams({
+                      countryId: item.id,
+                      cityId: undefined,
+                      lat: undefined,
+                      lng: undefined,
+                      radiusKm: undefined,
+                    })
+                    setCountrySearch(item.name)
+                    setSelectedCountryName(item.name)
+                    setCitySearch('')
+                    setSelectedCityName('')
+                  }}
+                  onRemove={() => {
                     setParams({ countryId: undefined, cityId: undefined })
                     setCountrySearch('')
+                    setSelectedCountryName('')
                     setCitySearch('')
+                    setSelectedCityName('')
                   }}
-                >
-                  <Text style={styles.selectedChipLabel}>{countrySearch}</Text>
-                </Pressable>
-              ) : (
-                <>
-                  <SearchBar
-                    value={countrySearch}
-                    onChangeText={(text) => {
-                      setCountrySearch(text)
-                      setShowCountryList(true)
-                    }}
-                    placeholder={t('filters.countryPlaceholder')}
-                  />
-
-                  {showCountryList && countries?.length > 0 && (
-                    <View style={styles.countryList}>
-                      {countries.slice(0, 5).map((country: any) => (
-                        <Pressable
-                          key={country.id}
-                          style={styles.countryItem}
-                          onPress={() => {
-                            setParams({
-                              countryId: country.id,
-                              cityId: undefined,
-                              lat: undefined,
-                              lng: undefined,
-                              radiusKm: undefined,
-                            })
-                            setCountrySearch(country.name)
-                            setShowCountryList(false)
-                          }}
-                        >
-                          <Text style={styles.countryText}>{country.name}</Text>
-                        </Pressable>
-                      ))}
-                    </View>
-                  )}
-                </>
+                  placeholder={t('filters.countryPlaceholder')}
+                  loading={countries === undefined}
+                />
               )}
             </View>
 
@@ -304,47 +272,42 @@ export function SearchFilters({
             {params.countryId && (
               <View style={styles.filterSection}>
                 <Text style={styles.sectionTitle}>{t('filters.city')}</Text>
-
                 {params.cityId ? (
-                  <Pressable
-                    style={styles.selectedChip}
-                    onPress={() => {
+                  <View style={styles.selectedContainer}>
+                    <FilterChip
+                      label={selectedCityName}
+                      active={true}
+                      onPress={() => {
+                        setParams({ cityId: undefined })
+                        setCitySearch('')
+                        setSelectedCityName('')
+                      }}
+                    />
+                  </View>
+                ) : (
+                  <AutocompleteFilter
+                    data={cities}
+                    value={citySearch}
+                    onChangeText={setCitySearch}
+                    selectedIds={params.cityId ? [params.cityId] : undefined}
+                    onSelect={(item) => {
+                      setParams({
+                        cityId: item.id,
+                        lat: undefined,
+                        lng: undefined,
+                        radiusKm: undefined,
+                      })
+                      setCitySearch(item.name)
+                      setSelectedCityName(item.name)
+                    }}
+                    onRemove={() => {
                       setParams({ cityId: undefined })
                       setCitySearch('')
+                      setSelectedCityName('')
                     }}
-                  >
-                    <Text style={styles.selectedChipLabel}>{citySearch}</Text>
-                  </Pressable>
-                ) : (
-                  <>
-                    <SearchBar
-                      value={citySearch}
-                      onChangeText={(text) => {
-                        setCitySearch(text)
-                        setShowCityList(true)
-                      }}
-                      onFocus={handleCityFocus}
-                      placeholder={t('filters.cityPlaceholder')}
-                    />
-
-                    {showCityList && cities && cities.length > 0 && (
-                      <View style={styles.countryList}>
-                        {cities.slice(0, 5).map((city: any) => (
-                          <Pressable
-                            key={city.id}
-                            style={styles.countryItem}
-                            onPress={() => {
-                              setParams({ cityId: city.id, lat: undefined, lng: undefined, radiusKm: undefined })
-                              setCitySearch(city.name)
-                              setShowCityList(false)
-                            }}
-                          >
-                            <Text style={styles.countryText}>{city.name}</Text>
-                          </Pressable>
-                        ))}
-                      </View>
-                    )}
-                  </>
+                    placeholder={t('filters.cityPlaceholder')}
+                    loading={cities === undefined}
+                  />
                 )}
               </View>
             )}
@@ -466,163 +429,87 @@ export function SearchFilters({
             {/* CUISINES */}
             <View style={styles.filterSection}>
               <Text style={styles.sectionTitle}>{t('filters.cuisines')}</Text>
-              {params.cuisineIds && params.cuisineIds.length > 0 ? (
-                <View style={styles.selectedRow}>
-                  {params.cuisineIds.map((id) => {
-                    const cuisine = cuisines?.find((c) => c.id === id)
-                    return cuisine ? (
-                      <Pressable
-                        key={id}
-                        style={styles.selectedChip}
-                        onPress={() => {
-                          const newIds = params.cuisineIds?.filter((i) => i !== id)
-                          setParams({ cuisineIds: newIds?.length ? newIds : undefined })
-                        }}
-                      >
-                        <Text style={styles.selectedChipLabel}>{cuisine.name}</Text>
-                      </Pressable>
-                    ) : null
-                  })}
-                </View>
-              ) : (
-                <>
-                  <SearchBar
-                    value={cuisineSearch}
-                    onChangeText={setCuisineSearch}
-                    onFocus={() => setShowCuisineList(true)}
-                    placeholder={t('filters.cuisinesPlaceholder')}
-                  />
-                  {showCuisineList && cuisines && cuisines.length > 0 && (
-                    <View style={styles.countryList}>
-                      {cuisines.slice(0, 5).map((cuisine) => (
-                        <Pressable
-                          key={cuisine.id}
-                          style={styles.countryItem}
-                          onPress={() => {
-                            const currentIds = params.cuisineIds || []
-                            if (!currentIds.includes(cuisine.id)) {
-                              setParams({ cuisineIds: [...currentIds, cuisine.id] })
-                            }
-                            setCuisineSearch('')
-                            setShowCuisineList(false)
-                          }}
-                        >
-                          <Text style={styles.countryText}>{cuisine.name}</Text>
-                        </Pressable>
-                      ))}
-                    </View>
-                  )}
-                </>
-              )}
+              <AutocompleteFilter
+                data={cuisines}
+                value={cuisineSearch}
+                onChangeText={setCuisineSearch}
+                selectedIds={params.cuisineIds}
+                selectedItemsCache={selectedCuisines}
+                onSelect={(item) => {
+                  const currentIds = params.cuisineIds || []
+                  if (!currentIds.includes(item.id)) {
+                    setParams({ cuisineIds: [...currentIds, item.id] })
+                    setSelectedCuisines([...selectedCuisines, item])
+                  }
+                  setCuisineSearch('')
+                }}
+                onRemove={(id) => {
+                  const newIds = params.cuisineIds?.filter((i) => i !== id)
+                  const newItems = selectedCuisines.filter((i) => i.id !== id)
+                  setParams({ cuisineIds: newIds?.length ? newIds : undefined })
+                  setSelectedCuisines(newItems)
+                }}
+                placeholder={t('filters.cuisinesPlaceholder')}
+                loading={cuisines === undefined}
+              />
             </View>
 
             {/* FACILITIES */}
             <View style={styles.filterSection}>
               <Text style={styles.sectionTitle}>{t('filters.facilities')}</Text>
-              {params.facilityIds && params.facilityIds.length > 0 ? (
-                <View style={styles.selectedRow}>
-                  {params.facilityIds.map((id) => {
-                    const facility = facilities?.find((f) => f.id === id)
-                    return facility ? (
-                      <Pressable
-                        key={id}
-                        style={styles.selectedChip}
-                        onPress={() => {
-                          const newIds = params.facilityIds?.filter((i) => i !== id)
-                          setParams({ facilityIds: newIds?.length ? newIds : undefined })
-                        }}
-                      >
-                        <Text style={styles.selectedChipLabel}>{facility.name}</Text>
-                      </Pressable>
-                    ) : null
-                  })}
-                </View>
-              ) : (
-                <>
-                  <SearchBar
-                    value={facilitySearch}
-                    onChangeText={setFacilitySearch}
-                    onFocus={() => setShowFacilityList(true)}
-                    placeholder={t('filters.facilitiesPlaceholder')}
-                  />
-                  {showFacilityList && facilities && facilities.length > 0 && (
-                    <View style={styles.countryList}>
-                      {facilities.slice(0, 5).map((facility) => (
-                        <Pressable
-                          key={facility.id}
-                          style={styles.countryItem}
-                          onPress={() => {
-                            const currentIds = params.facilityIds || []
-                            if (!currentIds.includes(facility.id)) {
-                              setParams({ facilityIds: [...currentIds, facility.id] })
-                            }
-                            setFacilitySearch('')
-                            setShowFacilityList(false)
-                          }}
-                        >
-                          <Text style={styles.countryText}>{facility.name}</Text>
-                        </Pressable>
-                      ))}
-                    </View>
-                  )}
-                </>
-              )}
+              <AutocompleteFilter
+                data={facilities}
+                value={facilitySearch}
+                onChangeText={setFacilitySearch}
+                selectedIds={params.facilityIds}
+                selectedItemsCache={selectedFacilities}
+                onSelect={(item) => {
+                  const currentIds = params.facilityIds || []
+                  if (!currentIds.includes(item.id)) {
+                    setParams({ facilityIds: [...currentIds, item.id] })
+                    setSelectedFacilities([...selectedFacilities, item])
+                  }
+                  setFacilitySearch('')
+                }}
+                onRemove={(id) => {
+                  const newIds = params.facilityIds?.filter((i) => i !== id)
+                  const newItems = selectedFacilities.filter((i) => i.id !== id)
+                  setParams({ facilityIds: newIds?.length ? newIds : undefined })
+                  setSelectedFacilities(newItems)
+                }}
+                placeholder={t('filters.facilitiesPlaceholder')}
+                loading={facilities === undefined}
+              />
             </View>
 
             {/* AMENITIES */}
             <View style={styles.filterSection}>
               <Text style={styles.sectionTitle}>{t('filters.amenities')}</Text>
-              {params.amenityIds && params.amenityIds.length > 0 ? (
-                <View style={styles.selectedRow}>
-                  {params.amenityIds.map((id) => {
-                    const amenity = amenities?.find((a) => a.id === id)
-                    return amenity ? (
-                      <Pressable
-                        key={id}
-                        style={styles.selectedChip}
-                        onPress={() => {
-                          const newIds = params.amenityIds?.filter((i) => i !== id)
-                          setParams({ amenityIds: newIds?.length ? newIds : undefined })
-                        }}
-                      >
-                        <Text style={styles.selectedChipLabel}>{amenity.name}</Text>
-                      </Pressable>
-                    ) : null
-                  })}
-                </View>
-              ) : (
-                <>
-                  <SearchBar
-                    value={amenitySearch}
-                    onChangeText={setAmenitySearch}
-                    onFocus={() => setShowAmenityList(true)}
-                    placeholder={t('filters.amenitiesPlaceholder')}
-                  />
-                  {showAmenityList && amenities && amenities.length > 0 && (
-                    <View style={styles.countryList}>
-                      {amenities.slice(0, 5).map((amenity) => (
-                        <Pressable
-                          key={amenity.id}
-                          style={styles.countryItem}
-                          onPress={() => {
-                            const currentIds = params.amenityIds || []
-                            if (!currentIds.includes(amenity.id)) {
-                              setParams({ amenityIds: [...currentIds, amenity.id] })
-                            }
-                            setAmenitySearch('')
-                            setShowAmenityList(false)
-                          }}
-                        >
-                          <Text style={styles.countryText}>{amenity.name}</Text>
-                        </Pressable>
-                      ))}
-                    </View>
-                  )}
-                </>
-              )}
+              <AutocompleteFilter
+                data={amenities}
+                value={amenitySearch}
+                onChangeText={setAmenitySearch}
+                selectedIds={params.amenityIds}
+                selectedItemsCache={selectedAmenities}
+                onSelect={(item) => {
+                  const currentIds = params.amenityIds || []
+                  if (!currentIds.includes(item.id)) {
+                    setParams({ amenityIds: [...currentIds, item.id] })
+                    setSelectedAmenities([...selectedAmenities, item])
+                  }
+                  setAmenitySearch('')
+                }}
+                onRemove={(id) => {
+                  const newIds = params.amenityIds?.filter((i) => i !== id)
+                  const newItems = selectedAmenities.filter((i) => i.id !== id)
+                  setParams({ amenityIds: newIds?.length ? newIds : undefined })
+                  setSelectedAmenities(newItems)
+                }}
+                placeholder={t('filters.amenitiesPlaceholder')}
+                loading={amenities === undefined}
+              />
             </View>
           </ScrollView>
-        </View>
       )}
     </View>
   )
@@ -665,7 +552,7 @@ const styles = StyleSheet.create({
   locationChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.byUniverse.purpleEngaged,
+    backgroundColor: colors.primary,
     borderRadius: radius.full,
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[1],
@@ -740,25 +627,14 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     marginBottom: spacing[1],
   },
-chipsRow: {
+  chipsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing[2],
   },
-  countryList: {
-    backgroundColor: colors.backgroundPrimary,
-    borderRadius: spacing[1],
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-    marginTop: spacing[1],
-  },
-  countryItem: {
-    padding: spacing[2],
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSubtle,
-  },
-  countryText: {
-    fontSize: typography.fontSize.body,
-    color: colors.textPrimary,
+  selectedContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing[2],
   },
 })
