@@ -1,8 +1,8 @@
+import { useEffect, useState } from 'react'
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
+  Keyboard,
   Modal,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -22,11 +22,13 @@ type Props = {
   candidates: RouteLocation[]
   loading: boolean
   error: string | null
-  activeOrigin: RouteLocation
-  activeDestination: RouteLocation
+  activeOrigin: RouteLocation | null
+  activeDestination: RouteLocation | null
   onClose: () => void
   onChangeQuery: (value: string) => void
   onSelect: (location: RouteLocation) => void
+  onUseCurrentLocation: () => void
+  isCurrentLocationLoading: boolean
 }
 
 export function AddressPickerModal({
@@ -41,69 +43,89 @@ export function AddressPickerModal({
   onClose,
   onChangeQuery,
   onSelect,
+  onUseCurrentLocation,
+  isCurrentLocationLoading,
 }: Props) {
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', (event) => {
+      setKeyboardHeight(event.endCoordinates.height)
+    })
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardHeight(0)
+    })
+
+    return () => {
+      showSub.remove()
+      hideSub.remove()
+    }
+  }, [])
+
   return (
     <Modal transparent visible={visible} animationType="fade" onRequestClose={onClose}>
-      <KeyboardAvoidingView
-        style={styles.keyboardAvoiding}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 24 : 0}
-      >
-        <View style={styles.backdrop}>
-          <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
-          <View style={styles.sheet}>
-            <Text style={styles.title}>
-              {target === 'origin' ? 'Choisir le depart' : 'Choisir l arrivee'}
-            </Text>
-            <TextInput
-              value={query}
-              onChangeText={onChangeQuery}
-              placeholder="Ex: 12 rue de Rivoli, Paris"
-              placeholderTextColor={colors.textSecondary}
-              autoCapitalize="words"
-              autoCorrect={false}
-              style={styles.input}
-            />
-            <Text style={styles.hint}>Tape au moins 3 caracteres</Text>
-            <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-              {loading ? (
-                <View style={styles.loadingRow}>
-                  <ActivityIndicator size="small" color={colors.red} />
-                  <Text style={styles.loadingText}>Recherche d adresses...</Text>
-                </View>
-              ) : null}
-              {error ? <Text style={styles.error}>{error}</Text> : null}
-              {candidates.map((candidate) => {
-                const activeLocation = target === 'origin' ? activeOrigin : activeDestination
-                const isActive =
-                  candidate.label === activeLocation.label &&
+      <View style={styles.backdrop}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+        <View style={[styles.sheet, keyboardHeight > 0 ? { marginBottom: keyboardHeight + 8 } : undefined]}>
+          <Text style={styles.title}>
+            {target === 'origin' ? 'Choisir le depart' : 'Choisir l arrivee'}
+          </Text>
+          <TextInput
+            value={query}
+            onChangeText={onChangeQuery}
+            placeholder="Ex: 12 rue de Rivoli, Paris"
+            placeholderTextColor={colors.textSecondary}
+            autoCapitalize="words"
+            autoCorrect={false}
+            style={styles.input}
+          />
+          <Text style={styles.hint}>Tape au moins 3 caracteres</Text>
+          <Pressable style={styles.locationButton} onPress={onUseCurrentLocation} disabled={isCurrentLocationLoading}>
+            {isCurrentLocationLoading ? (
+              <>
+                <ActivityIndicator size="small" color={colors.red} />
+                <Text style={styles.locationButtonText}>Localisation en cours...</Text>
+              </>
+            ) : (
+              <Text style={styles.locationButtonText}>Utiliser ma localisation</Text>
+            )}
+          </Pressable>
+          <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+            {loading ? (
+              <View style={styles.loadingRow}>
+                <ActivityIndicator size="small" color={colors.red} />
+                <Text style={styles.loadingText}>Recherche d adresses...</Text>
+              </View>
+            ) : null}
+            {error ? <Text style={styles.error}>{error}</Text> : null}
+            {candidates.map((candidate) => {
+              const activeLocation = target === 'origin' ? activeOrigin : activeDestination
+              const isActive = activeLocation
+                ? candidate.label === activeLocation.label &&
                   areCoordinatesClose(candidate.coordinate, activeLocation.coordinate)
+                : false
 
-                return (
-                  <Pressable
-                    key={`${candidate.label}-${candidate.coordinate.latitude}-${candidate.coordinate.longitude}`}
-                    style={[styles.option, isActive ? styles.optionActive : undefined]}
-                    onPress={() => onSelect(candidate)}
-                  >
-                    <Text style={[styles.optionLabel, isActive ? styles.optionLabelActive : undefined]}>
-                      {candidate.label}
-                    </Text>
-                  </Pressable>
-                )
-              })}
-            </ScrollView>
-            <SecondaryButton label="Fermer" onPress={onClose} />
-          </View>
+              return (
+                <Pressable
+                  key={`${candidate.label}-${candidate.coordinate.latitude}-${candidate.coordinate.longitude}`}
+                  style={[styles.option, isActive ? styles.optionActive : undefined]}
+                  onPress={() => onSelect(candidate)}
+                >
+                  <Text style={[styles.optionLabel, isActive ? styles.optionLabelActive : undefined]}>
+                    {candidate.label}
+                  </Text>
+                </Pressable>
+              )
+            })}
+          </ScrollView>
+          <SecondaryButton label="Fermer" onPress={onClose} />
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </Modal>
   )
 }
 
 const styles = StyleSheet.create({
-  keyboardAvoiding: {
-    flex: 1,
-  },
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.28)',
@@ -137,7 +159,25 @@ const styles = StyleSheet.create({
   hint: {
     fontSize: 11,
     color: colors.textSecondary,
+    marginBottom: 8,
+  },
+  locationButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+    borderRadius: radius.lg,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    backgroundColor: colors.backgroundSubtle,
     marginBottom: 10,
+  },
+  locationButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.red,
   },
   loadingRow: {
     flexDirection: 'row',

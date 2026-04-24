@@ -77,6 +77,76 @@ export function buildRoutePoints(
   return [origin, ...selectedStops.map((stop) => stop.coordinate), destination]
 }
 
+function toRadians(value: number) {
+  return (value * Math.PI) / 180
+}
+
+function distanceBetweenPointsMeters(a: Coordinate, b: Coordinate) {
+  const earthRadiusMeters = 6371000
+  const deltaLat = toRadians(b.latitude - a.latitude)
+  const deltaLng = toRadians(b.longitude - a.longitude)
+  const aTerm =
+    Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+    Math.cos(toRadians(a.latitude)) * Math.cos(toRadians(b.latitude)) * Math.sin(deltaLng / 2) * Math.sin(deltaLng / 2)
+
+  const c = 2 * Math.atan2(Math.sqrt(aTerm), Math.sqrt(1 - aTerm))
+  return earthRadiusMeters * c
+}
+
+function interpolatePoint(start: Coordinate, end: Coordinate, ratio: number): Coordinate {
+  return {
+    latitude: start.latitude + (end.latitude - start.latitude) * ratio,
+    longitude: start.longitude + (end.longitude - start.longitude) * ratio,
+  }
+}
+
+export function sampleRouteCoordinates(route: Coordinate[], sampleCount: number): Coordinate[] {
+  if (sampleCount <= 0 || route.length < 2) {
+    return []
+  }
+
+  const segmentLengths: number[] = []
+  let totalLength = 0
+
+  for (let index = 0; index < route.length - 1; index += 1) {
+    const segmentLength = distanceBetweenPointsMeters(route[index], route[index + 1])
+    segmentLengths.push(segmentLength)
+    totalLength += segmentLength
+  }
+
+  if (totalLength <= 0) {
+    return []
+  }
+
+  const sampled: Coordinate[] = []
+  let segmentIndex = 0
+  let segmentStartDistance = 0
+
+  for (let pointIndex = 1; pointIndex <= sampleCount; pointIndex += 1) {
+    const targetDistance = (totalLength * pointIndex) / (sampleCount + 1)
+
+    while (
+      segmentIndex < segmentLengths.length - 1 &&
+      segmentStartDistance + segmentLengths[segmentIndex] < targetDistance
+    ) {
+      segmentStartDistance += segmentLengths[segmentIndex]
+      segmentIndex += 1
+    }
+
+    const segmentLength = segmentLengths[segmentIndex]
+    if (segmentLength <= 0) {
+      sampled.push(route[segmentIndex])
+      continue
+    }
+
+    const offsetInSegment = targetDistance - segmentStartDistance
+    const ratio = Math.min(1, Math.max(0, offsetInSegment / segmentLength))
+    sampled.push(interpolatePoint(route[segmentIndex], route[segmentIndex + 1], ratio))
+  }
+
+  return sampled
+}
+
 export function buildGoogleMapsUrl(points: Coordinate[]) {
   const origin = toLatLngQuery(points[0])
   const destination = toLatLngQuery(points[points.length - 1])
